@@ -27,9 +27,9 @@ use Model\User_model;
       <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
         <li class="nav-item">
             <? if (User_model::is_logged()) {?>
-              <a href="/main_page/logout" class="btn btn-primary my-2 my-sm-0"
-                 data-target="#loginModal">Log out, <?= $user->personaname?>
-              </a>
+                <button type="button"  class="btn btn-primary my-2 my-sm-0" type="submit" @click.prevent="logout">
+                    Log out, <?= $user->personaname?>
+                </button>
             <? } else {?>
               <button type="button" class="btn btn-success my-2 my-sm-0" type="submit" data-toggle="modal"
                       data-target="#loginModal">Log IN
@@ -189,22 +189,44 @@ use Model\User_model;
                   <span>{{likes}}</span>
                 </div>
               </div>
-              <p class="card-text" v-for="comment in post.coments">
-                  {{comment.user.personaname + ' - '}}
-                  <small class="text-muted">{{comment.text}}</small>
-                  <a role="button" @click="addLike('comment', comment.id)">
-                      <svg class="bi bi-heart-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                          <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" clip-rule="evenodd"/>
-                      </svg>
-                      {{ comment.likes }}
-                  </a>
-              </p>
-              <form class="form-inline">
-                <div class="form-group">
-                  <input type="text" class="form-control" id="addComment" v-model="commentText">
-                </div>
-                <button type="button" class="btn btn-primary" @click="addComment(post.id)">Add comment</button>
-              </form>
+                <form>
+                    <div class="form-group">
+                        <label for="" v-if="replyId !== ''">Добавить ответ к {{replyText}}</label>
+                        <br>
+                        <input type="text" class="form-control" id="addComment" v-model="commentText">
+                    </div>
+                    <button type="button" class="btn btn-primary" @click="addComment(post.id)">Add comment</button>
+                </form>
+                <br>
+                
+              <div class="card-text list-group" v-for="(comment, index) in post.coments" :key="comment.id" :index="index">
+                  <div class="row list-group-item">
+                     <div class="col-12" v-if="!comment.reply_id">
+                         {{comment.user.personaname + ' - '}}
+                         <small class="text-muted">{{comment.text}}</small>
+                         <a role="button" @click="addLike('comment', comment.id)">
+                             <svg class="bi bi-heart-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                 <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" clip-rule="evenodd"/>
+                             </svg>
+                             {{ comment.likes }}
+                         </a>
+                         <span class="btn btn-sm btn-link" @click="addReplyComment(comment.id, comment.text)">Ответить</span>
+                         <br>
+                     </div>
+
+                      <div class="col-12" v-else>
+                          {{comment.user.personaname + ' - '}}
+                          <small class="text-muted">{{comment.text}}</small>
+                          <a role="button" @click="addLike('comment', comment.id)">
+                              <svg class="bi bi-heart-fill" width="1em" height="1em" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                  <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z" clip-rule="evenodd"/>
+                              </svg>
+                              {{ comment.likes }}
+                          </a>
+                          <span class="btn btn-sm btn-link" @click="addReplyComment(comment.id, comment.text)">Ответить</span>
+                      </div>
+                  </div>
+              </div>
             </div>
           </div>
         </div>

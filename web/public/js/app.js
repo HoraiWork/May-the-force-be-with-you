@@ -15,30 +15,43 @@ var app = new Vue({
 		likes: 0,
 		commentText: '',
 		boosterpacks: [],
+		replyId:null,
+		replyText:'',
 	},
 	computed: {
 		test: function () {
-			var data = [];
+			let data = [];
 			return data;
 		}
 	},
 	created(){
-		var self = this
-		axios
-			.get('/main_page/get_all_posts')
-			.then(function (response) {
-				self.posts = response.data.posts;
-			})
-
-		axios
-			.get('/main_page/get_boosterpacks')
-			.then(function (response) {
-				self.boosterpacks = response.data.boosterpacks;
-			})
+		let self = this
+		self.get_all_posts()
+		self.get_boosterpacks()
 	},
 	methods: {
-		logout: function () {
-			console.log ('logout');
+		get_all_posts: function () {
+			let self= this;
+			axios
+				.get('/main_page/get_all_posts')
+				.then(function (response) {
+					self.posts = response.data.posts;
+				})
+		},
+		get_boosterpacks: function () {
+			let self= this;
+			axios
+				.get('/main_page/get_boosterpacks')
+				.then(function (response) {
+					self.boosterpacks = response.data.boosterpacks;
+				})
+		},
+ 		logout: function () {
+			axios.post('/main_page/logout')
+				.then(function () {
+					console.log ('logout');
+					location.reload();
+				})
 		},
 		logIn: function () {
 			var self= this;
@@ -59,6 +72,7 @@ var app = new Vue({
 
 				axios.post('/main_page/login', form)
 					.then(function (response) {
+						console.log(response , 'response')
 						if(response.data.user) {
 							location.reload();
 						}
@@ -68,22 +82,27 @@ var app = new Vue({
 					})
 			}
 		},
+		addReplyComment(reply_id, reply_text) {
+			let self = this;
+			self.replyId = reply_id
+			self.replyText = reply_text
+		},
 		addComment: function(id) {
 			var self = this;
 			if(self.commentText) {
 
 				var comment = new FormData();
 				comment.append('postId', id);
+				comment.append('replyId', self.replyId);
 				comment.append('commentText', self.commentText);
 
 				axios.post(
 					'/main_page/comment',
 					comment
-				).then(function () {
-
+				).then(function (response) {
+					self.post.coments.push(response.data.comment)
 				});
 			}
-
 		},
 		refill: function () {
 			var self= this;
