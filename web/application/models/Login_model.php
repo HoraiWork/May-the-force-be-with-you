@@ -4,6 +4,7 @@ namespace Model;
 
 use App;
 use Exception;
+use Model\User_model;
 use System\Core\CI_Model;
 
 class Login_model extends CI_Model {
@@ -23,11 +24,15 @@ class Login_model extends CI_Model {
      * @return User_model
      * @throws Exception
      */
-    public static function login(): User_model
+    public static function login($login, $password): User_model
     {
         // TODO: task 1, аутентификация
+        $user = User_model::find_user_by_email($login);
 
-        self::start_session();
+        if($user->is_loaded() && self::password_verify($user, $password)) {
+                self::start_session($user->get_id());
+        }
+        return $user;
     }
 
     public static function start_session(int $user_id)
@@ -39,5 +44,15 @@ class Login_model extends CI_Model {
         }
 
         App::get_ci()->session->set_userdata('id', $user_id);
+    }
+    
+    /**
+     * @param \Model\User_model $user
+     * @param string $password
+     * @return bool
+     */
+    public static function password_verify(User_model $user, string $password) : bool
+    {
+        return $user->get_password() === $password;
     }
 }
